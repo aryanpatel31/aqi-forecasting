@@ -4,7 +4,9 @@ for Chicago, IL and saves raw CSVs to data/raw/.
 """
 
 import os
-from dotenv import load_dot_env
+import requests
+import pandas as pd
+from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -27,8 +29,29 @@ def fetch_aqi():
 
 
 def fetch_weather():
-    """Pull historical weather from Open-Meteo archive API. TODO."""
-    pass
+    """Pull historical weather from Open-Meteo archive API."""
+
+    url = "https://archive-api.open-meteo.com/v1/archive"
+
+    params = {
+        "latitude": LATITUDE,
+        "longitude": LONGITUDE,
+        "start_date": START_DATE,
+        "end_date": END_DATE,
+        "hourly": "temperature_2m,relative_humidity_2m,wind_speed_10m,wind_direction_10m,surface_pressure,precipitation",
+        "timezone": "America/Chicago",
+    }
+
+    response = requests.get(url, params=params)
+    response.raise_for_status()
+    data = response.json()["hourly"]
+
+    df = pd.DataFrame(data)
+    df.rename(columns={"time": "datetime"}, inplace=True)
+    df.to_csv(RAW_WEATHER_PATH, index=False)
+    print(f"Saved {len(df)} weather rows to {RAW_WEATHER_PATH}")
+    return df
+    
 
 
 if __name__ == "__main__":
