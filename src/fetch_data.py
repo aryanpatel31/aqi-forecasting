@@ -7,6 +7,8 @@ import os
 import requests
 import pandas as pd
 from dotenv import load_dotenv
+import time
+from datetime import datetime, timedelta
 
 load_dotenv()
 
@@ -24,8 +26,37 @@ RAW_WEATHER_PATH = "data/raw/raw_weather.csv"
 
 
 def fetch_aqi():
-    """Pull historical AQI from AirNow API in monthly chunks. TODO."""
-    pass
+    """Pull historical AQI from AirNow API in monthly chunks."""
+    start = datetime.strptime(START_DATE, "%Y-%m-%d")
+    end = datetime.strptime(END_DATE, "%Y-%m-%d")
+
+    all_records = []
+    current = start
+
+    while current <= end:
+        date_str = current.strftime("%Y-%m-%dT00-0000")
+        url = "https://www.airnowapi.org/aq/observation/zipCode/historical/"
+        params = {
+            "format": "application/json",
+            "zipCode": AIRNOW_ZIP,
+            "date": date_str,
+            "distance": 25,
+            "API_KEY": AIRNOW_API_KEY,
+        }
+
+        response = requests.get(url, params=params)
+        if response.status_code == 200:
+            all_records.extend(response.json())
+        else:
+            print(f"Failed on {date_str}: {response.status_code}")
+
+        current += timedelta(days=1)
+        time.sleep(0.2)  # staying under rate limit
+
+    df = pd.DataFrame(all_records)
+    df.to_csv(RAW_AQI_PATH, index=False)
+    print(f"Saved {len(df)} AQI rows to {RAW_AQI_PATH}")
+    return df
 
 
 def fetch_weather():
