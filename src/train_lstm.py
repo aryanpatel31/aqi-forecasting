@@ -38,5 +38,16 @@ def make_sequences(X, y, seq_len):
     for i in range(len(X) - seq_len):
         X_seq.append(X[i:i + seq_len])
         y_seq.append(y[i + seq_len])
-        
+
     return np.array(X_seq), np.array(y_seq)
+
+class LSTMModel(nn.Module):
+    def __init__(self, input_size, hidden_size=32, num_layers=1):
+        super().__init__()
+        self.lstm = nn.LSTM(input_size, hidden_size, num_layers, batch_first=True)
+        self.fc = nn.Linear(hidden_size, 1)
+
+    def forward(self, x):
+        out, _ = self.lstm(x)
+        out = out[:, -1, :]  # last timestep's output
+        return self.fc(out).squeeze(-1)
