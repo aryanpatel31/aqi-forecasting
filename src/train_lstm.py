@@ -3,6 +3,8 @@ Train and evaluate an LSTM baseline for next-day AQI forecasting,
 compared against the XGBoost baseline.
 """
 
+# Note: LSTM is overfitting potentially due to small dataset
+
 from pathlib import Path
 import numpy as np
 import pandas as pd
