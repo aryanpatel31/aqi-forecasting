@@ -104,3 +104,6 @@ def train_lstm():
     print(f"LSTM                 MAE: {mae:.2f}  RMSE: {rmse:.2f}")
 
     return model, test_preds, y_test_actual
+
+if __name__ == "__main__":
+    train_lstm()
