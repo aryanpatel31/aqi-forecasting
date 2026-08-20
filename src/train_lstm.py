@@ -51,3 +51,56 @@ class LSTMModel(nn.Module):
         out, _ = self.lstm(x)
         out = out[:, -1, :]  # last timestep's output
         return self.fc(out).squeeze(-1)
+
+def train_lstm():
+    df = load_data()
+    split_idx = int(len(df) * 0.8)
+
+    train_df = df.iloc[:split_idx]
+    test_df = df.iloc[split_idx:]
+
+    scaler_X = StandardScaler()
+    scaler_y = StandardScaler()
+
+    X_train = scaler_X.fit_transform(train_df[FEATURE_COLS])
+    X_test = scaler_X.transform(test_df[FEATURE_COLS])
+    y_train = scaler_y.fit_transform(train_df[[TARGET_COL]]).flatten()
+    y_test = scaler_y.transform(test_df[[TARGET_COL]]).flatten()
+
+    X_train_seq, y_train_seq = make_sequences(X_train, y_train, SEQ_LEN)
+    X_test_seq, y_test_seq = make_sequences(X_test, y_test, SEQ_LEN)
+
+    X_train_t = torch.tensor(X_train_seq, dtype=torch.float32)
+    y_train_t = torch.tensor(y_train_seq, dtype=torch.float32)
+    X_test_t = torch.tensor(X_test_seq, dtype=torch.float32)
+    y_test_t = torch.tensor(y_test_seq, dtype=torch.float32)
+
+    model = LSTMModel(input_size=len(FEATURE_COLS))
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.1)
+    loss_fn = nn.MSELoss()
+
+    epochs = 100
+    for epoch in range(epochs):
+        model.train()
+        optimizer.zero_grad()
+        preds = model(X_train_t)
+        loss = loss_fn(preds, y_train_t)
+        loss.backward()
+        optimizer.step()
+
+        if (epoch + 1) % 20 == 0:
+            print(f"Epoch {epoch+1}/{epochs}  Loss: {loss.item():.4f}")
+
+    model.eval()
+    with torch.no_grad():
+        test_preds_scaled = model(X_test_t).numpy()
+
+    # Unscale predictions back to real AQI values
+    test_preds = scaler_y.inverse_transform(test_preds_scaled.reshape(-1, 1)).flatten()
+    y_test_actual = scaler_y.inverse_transform(y_test_seq.reshape(-1, 1)).flatten()
+
+    mae = mean_absolute_error(y_test_actual, test_preds)
+    rmse = np.sqrt(mean_squared_error(y_test_actual, test_preds))
+    print(f"LSTM                 MAE: {mae:.2f}  RMSE: {rmse:.2f}")
+
+    return model, test_preds, y_test_actual
