@@ -30,3 +30,13 @@ def load_data():
     df["date"] = pd.to_datetime(df["date"])
     df = df.sort_values("date").reset_index(drop=True)
     return df
+
+def make_sequences(X, y, seq_len):
+    """Turn flat feature rows into overlapping sequences of length seq_len."""
+
+    X_seq, y_seq = [], []
+    for i in range(len(X) - seq_len):
+        X_seq.append(X[i:i + seq_len])
+        y_seq.append(y[i + seq_len])
+        
+    return np.array(X_seq), np.array(y_seq)
