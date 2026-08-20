@@ -76,7 +76,7 @@ def train_lstm():
     y_test_t = torch.tensor(y_test_seq, dtype=torch.float32)
 
     model = LSTMModel(input_size=len(FEATURE_COLS))
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.1)
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
     loss_fn = nn.MSELoss()
 
     epochs = 100
