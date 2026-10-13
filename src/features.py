@@ -22,8 +22,8 @@ def build_features():
     df["aqi_lag_3"] = df["AQI"].shift(3)
 
     # Rolling averages
-    df["aqi_roll_3"] = df["AQI"].shift(1).rolling(window=3).mean()
-    df["aqi_roll_7"] = df["AQI"].shift(1).rolling(window=7).mean()
+    df["aqi_roll_3"] = df["AQI"].rolling(window=3).mean()
+    df["aqi_roll_7"] = df["AQI"].rolling(window=7).mean()
 
     # Time encodings
     df["month"] = df["date"].dt.month
