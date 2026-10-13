@@ -7,3 +7,4 @@ scikit-learn
 shap
 plotly
 python-dotenv
+matplotlib
