@@ -20,7 +20,7 @@ FEATURES_PATH = BASE_DIR / "data/processed/features.csv"
 FEATURE_COLS = [
     "temperature_2m", "relative_humidity_2m", "wind_speed_10m",
     "wind_direction_10m", "surface_pressure", "precipitation",
-    "aqi_lag_1", "aqi_lag_2", "aqi_lag_3",
+    "AQI", "aqi_lag_1", "aqi_lag_2", "aqi_lag_3",
     "aqi_roll_3", "aqi_roll_7",
     "month", "day_of_week", "day_of_year",
 ]
