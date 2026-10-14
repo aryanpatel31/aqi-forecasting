@@ -13,7 +13,6 @@ import torch.nn as nn
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 
-
 BASE_DIR = Path(__file__).resolve().parent.parent
 FEATURES_PATH = BASE_DIR / "data/processed/features.csv"
 
@@ -55,6 +54,7 @@ class LSTMModel(nn.Module):
         return self.fc(out).squeeze(-1)
 
 def train_lstm():
+    torch.manual_seed(42)
     df = load_data()
     split_idx = int(len(df) * 0.8)
 
@@ -105,6 +105,7 @@ def train_lstm():
     rmse = np.sqrt(mean_squared_error(y_test_actual, test_preds))
     print(f"LSTM                 MAE: {mae:.2f}  RMSE: {rmse:.2f}")
 
+    np.save(BASE_DIR / "results/lstm_preds.npy", test_preds)
     return model, test_preds, y_test_actual
 
 if __name__ == "__main__":

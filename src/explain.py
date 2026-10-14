@@ -13,12 +13,17 @@ from train_baseline import (
 )
 
 FIG_DIR = BASE_DIR / "results/figures"
+SEQ_LEN = 7
 
 
 def main():
     FIG_DIR.mkdir(parents=True, exist_ok=True)
     train, test = load_split_data()
     model, preds = train_xgboost(train, test)
+
+    # LSTM predictions saved by train_lstm.py (covers test days after the first 7)
+    lstm_preds = np.load(BASE_DIR / "results/lstm_preds.npy")
+    lstm_dates = test["date"].iloc[SEQ_LEN:]
 
     # SHAP feature importance
     explainer = shap.TreeExplainer(model)
@@ -39,6 +44,7 @@ def main():
     plt.figure(figsize=(10, 4))
     plt.plot(test["date"], test[TARGET_COL], label="Actual")
     plt.plot(test["date"], preds, label="XGBoost")
+    plt.plot(lstm_dates, lstm_preds, label="LSTM", alpha=0.7)
     plt.plot(test["date"], test["AQI"], label="Persistence", linestyle="--", alpha=0.5)
     plt.ylabel("AQI")
     plt.legend()
